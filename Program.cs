@@ -6,19 +6,11 @@ public class Program
 {
     public static void Main()
     {
-        var fmod = new FMODExample();
-
-        fmod.Initialize();
-        fmod.LoadSound("resource/audio/speech.wav");
-        fmod.SetListenerPosition(0, 0, 0, 0, 0);
-        fmod.PlayAt(5, 0, 0);
-
-        var gain = -40;
-        fmod.SetFrequencyGain(0, gain, gain);
+        var scene = new Scene();
 
         while (true)
         {
-            fmod.Update();
+            scene.Update();
             Thread.Sleep(16);
         }
     }

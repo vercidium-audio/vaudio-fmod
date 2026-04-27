@@ -25,22 +25,22 @@ public class FMODExample
         sound.set3DMinMaxDistance(1.0f, 100.0f);
     }
 
-    public void PlayAt(float x, float y, float z)
+    public void PlayAt(vaudio.Vector3F pos)
     {
         // Start paused so we can set position before audible playback
         system.getMasterChannelGroup(out ChannelGroup masterGroup);
         system.playSound(sound, masterGroup, true, out channel);
 
-        VECTOR position = new() { x = x, y = y, z = z };
+        VECTOR position = new() { x = pos.X, y = pos.Y, z = pos.Z };
         VECTOR velocity = new() { x = 0, y = 0, z = 0 };
         channel.set3DAttributes(ref position, ref velocity);
 
         channel.setPaused(false);
     }
 
-    public void SetListenerPosition(float x, float y, float z, float forwardX, float forwardZ)
+    public void SetListenerPosition(vaudio.Vector3F position, float forwardX, float forwardZ)
     {
-        VECTOR listenerPos = new() { x = x, y = y, z = z };
+        VECTOR listenerPos = new() { x = position.X, y = position.Y, z = position.Z };
         VECTOR listenerVel = new() { x = 0, y = 0, z = 0 };
         VECTOR forward = new() { x = forwardX, y = 0, z = forwardZ };
         VECTOR up = new() { x = 0, y = 1, z = 0 };
