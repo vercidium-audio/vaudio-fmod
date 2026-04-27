@@ -1,0 +1,10 @@
+.vs/
+bin/
+obj/
+lib/
+resource/
+
+# FMOD wrappers
+fmod.cs
+fmod_dsp.cs
+fmod_errors.cs

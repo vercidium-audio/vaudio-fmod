@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>vaudio_fmod</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="lib\fmod.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>fmod.dll</Link>
+		</None>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<!-- Copy the resource folder to the build directory -->
+		<ItemGroup>
+			<ResourceFiles Include="$(ProjectDir)\resource\**\*.*" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(ResourceFiles)" DestinationFolder="$(OutDir)\resource\%(RecursiveDir)" />
+	</Target>
+</Project>
