@@ -1,4 +1,5 @@
 using FMOD;
+using System;
 
 namespace vaudio_fmod;
 
@@ -25,10 +26,25 @@ public class FMODSound
         channel.set3DAttributes(ref position, ref velocity);
     }
 
-    public void SetFrequencyGain(float gainLF, float gainMF, float gainHF)
+    public void UpdateFilter(vaudio.AudioFilter filter)
     {
-        eq.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, gainLF);
-        eq.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, gainMF);
-        eq.setParameterFloat((int)DSP_THREE_EQ.HIGHGAIN, gainHF);
+        // Convert from percentage range (0 to 1) to decibel range (-80 to 10)
+        var lfDecibels = PercentToDecibels(filter.gainLF);
+        var mfDecibels = PercentToDecibels((filter.gainLF + filter.gainHF) / 2);
+        var hfDecibels = PercentToDecibels(filter.gainHF);
+
+        eq.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, lfDecibels);
+        eq.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, mfDecibels);
+        eq.setParameterFloat((int)DSP_THREE_EQ.HIGHGAIN, hfDecibels);
+    }
+
+    static float PercentToDecibels(float percent)
+    {
+        if (percent <= 0f)
+            return -80f;
+
+        float db = 20f * MathF.Log10(percent);
+
+        return MathF.Max(db, -80f);
     }
 }

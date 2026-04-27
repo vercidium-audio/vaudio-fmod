@@ -7,14 +7,39 @@ public class FMODSystem
 {
     private FMOD.System system;
     private Sound sound;
+    private DSP reverbDSP;
 
     public FMODSystem()
     {
         Factory.System_Create(out system);
         system.init(512, INITFLAGS.NORMAL, IntPtr.Zero);
-
-        // Enable 3D sound
         system.set3DSettings(1.0f, 1.0f, 1.0f);
+        system.createDSPByType(DSP_TYPE.SFXREVERB, out reverbDSP);
+
+        system.getMasterChannelGroup(out ChannelGroup masterGroup);
+        masterGroup.addDSP(0, reverbDSP);
+    }
+
+    public void UpdateReverb(vaudio.EAXReverbResults eax)
+    {
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.DECAYTIME, eax.DecayTime * 1000); // ms
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.EARLYDELAY, eax.ReflectionsDelay * 1000); // ms
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.LATEDELAY, eax.LateReverbDelay * 1000); // ms
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.HFREFERENCE, eax.HFReference); // Hz
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.HFDECAYRATIO, Math.Clamp(eax.DecayHFRatio * 100f, 10f, 100f));
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.DIFFUSION, eax.Diffusion * 100f); // 0-1 → %
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.DENSITY, eax.Density * 100f); // 0-1 → %
+
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.LOWSHELFFREQUENCY, eax.LFReference);
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.LOWSHELFGAIN, 20f * MathF.Log10(MathF.Max(eax.GainLF, 1e-6f)));
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.HIGHCUT, eax.HFReference * eax.AirAbsorptionGainHF);
+
+        float totalGain = eax.ReflectionsGain + eax.LateReverbGain;
+        float earlyLateMix = totalGain > 0f ? eax.ReflectionsGain / totalGain * 100f : 50f;
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.EARLYLATEMIX, Math.Clamp(earlyLateMix, 0f, 100f));
+
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.WETLEVEL, 20f * MathF.Log10(MathF.Max((eax.GainLF + eax.GainHF) / 2, 1e-6f)));
+        reverbDSP.setParameterFloat((int)DSP_SFXREVERB.DRYLEVEL, 0f);
     }
 
     public void LoadSoundData(string filePath)
@@ -79,6 +104,7 @@ public class FMODSystem
     public void Dispose()
     {
         sound.release();
+        reverbDSP.release();
         system.close();
         system.release();
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace vaudio_fmod;
@@ -10,7 +11,8 @@ internal class Scene
     vaudio.RaytracingContext context;
     vaudio.Emitter listener;
     vaudio.Emitter speech;
-    vaudio.PrismPrimitive prism;
+    vaudio.PrismPrimitive clothPrism;
+    List<vaudio.PrismPrimitive> concretePrisms = [];
 
     internal Scene()
     {
@@ -24,7 +26,8 @@ internal class Scene
         context = new()
         {
             RenderingEnabled = true,
-            WorldSize = new(20),
+            WorldSize = new(100),
+            OnReverbUpdated = OnReverbUpdated
         };
 
 
@@ -34,8 +37,19 @@ internal class Scene
             Name = "Listener",
             PermeationRayCount = 32,
             PermeationBounceCount = 3,
-            Position = new vaudio.Vector3F(5, 10, 10),
+            ReverbRayCount = 32,
+            ReverbBounceCount = 24,
+            MaxEchogramTime = 5000,
+            EchogramGranularity = 100,
+            Position = new vaudio.Vector3F(40, 50, 50),
+
+            // Customise ray rendering
+            PermeationColor = new vaudio.Color(255, 150, 0, 150),
+            TrailColor = new vaudio.Color(255, 255, 255, 50),
         };
+
+        // Set the energy cap based on reverb ray counts
+        listener.ReverbEnergyCap = listener.ReverbRayCount * listener.ReverbBounceCount * 0.05f;
 
         context.AddEmitter(listener);
 
@@ -44,7 +58,7 @@ internal class Scene
         speech = new()
         {
             Name = "Speech",
-            Position = new vaudio.Vector3F(10),
+            Position = new vaudio.Vector3F(50),
             OnRaytracedByAnotherEmitter = OnSpeechRaytraced
         };
 
@@ -53,14 +67,88 @@ internal class Scene
 
 
         // Add a cloth prism to the simulation
-        prism = new()
+        clothPrism = new()
         {
             size = new(4),
             material = vaudio.MaterialType.Cloth
         };
 
-        context.AddPrimitive(prism);
+        context.AddPrimitive(clothPrism);
 
+        // Left and right
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(100, 100, 1),
+                transform = vaudio.Matrix4F.CreateTranslation(50, 50, 0),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
+
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(100, 100, 1),
+                transform = vaudio.Matrix4F.CreateTranslation(50, 50, 100),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
+
+        // Front and back
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(1, 100, 100),
+                transform = vaudio.Matrix4F.CreateTranslation(0, 50, 50),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
+
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(1, 100, 100),
+                transform = vaudio.Matrix4F.CreateTranslation(100, 50, 50),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
+
+        // Top and bottom
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(100, 1, 100),
+                transform = vaudio.Matrix4F.CreateTranslation(50, 0, 50),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
+
+        {
+            var prism = new vaudio.PrismPrimitive()
+            {
+                material = vaudio.MaterialType.Concrete,
+                size = new(100, 1, 100),
+                transform = vaudio.Matrix4F.CreateTranslation(50, 100, 50),
+            };
+
+            concretePrisms.Add(prism);
+            context.AddPrimitive(prism);
+        }
 
         // Reduce the transmission of the cloth material, so we can hear the sound when the prism moves on top of the speech Emitter 
         var cloth = context.GetMaterial(vaudio.MaterialType.Cloth);
@@ -70,11 +158,18 @@ internal class Scene
         context.MaterialsDirty = true;
     }
 
+    void OnReverbUpdated()
+    {
+        fmod.UpdateReverb(listener.EAX);
+    }
+
     void InitialiseFMOD()
     {
         fmod = new FMODSystem();
         fmod.LoadSoundData("resource/audio/speech.wav");
-        fmod.SetListenerPosition(listener.Position.GetPosition(), 0, 0);
+
+        // Face the listener towards the speech Emitter
+        fmod.SetListenerPosition(listener.Position.GetPosition(), 0, MathF.PI / 2);
     }
 
     // This callback is invoked when the listener raytraces the speech Emitter
@@ -90,20 +185,35 @@ internal class Scene
         fmodSound.Play();
     }
 
-    Stopwatch prismWatch = Stopwatch.StartNew();
+    Stopwatch watch = Stopwatch.StartNew();
 
     internal void Update()
     {
-        fmod.SetListenerPosition(listener.Position.GetPosition(), 0, MathF.PI / 2);
-
         // Move the prism onto the speech Emitter to muffle it
-        var lerp = (MathF.Sin(prismWatch.ElapsedMilliseconds / 2000.0f + 1.25f) + 1) / 2;
+        {
+            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 2000.0f + 1.25f) + 1) / 2;
+            clothPrism.transform = vaudio.Matrix4F.CreateTranslation(Lerp(50.0f, 55.0f, lerp), 50, 50);
+        }
 
-        prism.transform = vaudio.Matrix4F.CreateTranslation(Lerp(10.0f, 15.0f, lerp), 10, 10);
+        // Expand/contract the concrete prisms over time
+        {
+            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 4100.0f + 1.25f) + 1) / 2;
+            var radius = Lerp(100, 25, lerp);
 
-        listener.permeationColor = new vaudio.Color(255, 150, 0, 255);
-        listener.trailColor = new vaudio.Color(255, 255, 255, 50);
+            var size = new vaudio.Vector3F(radius, radius, 1);
+            concretePrisms[0].size = size;
+            concretePrisms[1].size = size;
 
+            size = new vaudio.Vector3F(1, radius, radius);
+            concretePrisms[2].size = size;
+            concretePrisms[3].size = size;
+
+            size = new vaudio.Vector3F(radius, 1, radius);
+            concretePrisms[4].size = size;
+            concretePrisms[5].size = size;
+        }
+
+        // Update the raytracing context
         context.Update();
 
         // Update the low pass filter
@@ -112,33 +222,16 @@ internal class Scene
             UpdateLowPassFilter();
         }
 
+        // Update FMOD
         fmod.Update();
     }
 
     void UpdateLowPassFilter()
     {
-        if (fmodSound == null)
-            return;
-
         var filter = listener.GetTargetFilter(speech);
-
-        // Convert from percentage range (0 to 1) to decibel range (-80 to 10)
-        var lfDecibels = PercentToDecibels(filter.gainLF);
-        var mfDecibels = PercentToDecibels((filter.gainLF + filter.gainHF) / 2);
-        var hfDecibels = PercentToDecibels(filter.gainHF);
-
-        fmodSound.SetFrequencyGain(lfDecibels, mfDecibels, hfDecibels);
+        fmodSound.UpdateFilter(filter);
     }
 
     static float Lerp(float current, float target, float lerp) => current + (target - current) * lerp;
 
-    static float PercentToDecibels(float percent)
-    {
-        if (percent <= 0f)
-            return -80f;
-
-        float db = 20f * MathF.Log10(percent);
-
-        return MathF.Max(db, -80f);
-    }
 }
