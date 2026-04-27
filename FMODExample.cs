@@ -9,7 +9,7 @@ public class FMODExample
     private Sound sound;
     private Channel channel;
 
-    public void Initialize()
+    public FMODExample()
     {
         Factory.System_Create(out system);
         system.init(512, INITFLAGS.NORMAL, IntPtr.Zero);
@@ -21,7 +21,7 @@ public class FMODExample
     public void LoadSound(string filePath)
     {
         // FMOD_3D flag makes the sound positional
-        system.createSound(filePath, MODE._3D | MODE.LOOP_OFF, out sound);
+        system.createSound(filePath, MODE._3D | MODE.LOOP_NORMAL, out sound);
         sound.set3DMinMaxDistance(1.0f, 100.0f);
     }
 
@@ -36,6 +36,13 @@ public class FMODExample
         channel.set3DAttributes(ref position, ref velocity);
 
         channel.setPaused(false);
+
+        system.createDSPByType(DSP_TYPE.THREE_EQ, out var dsp);
+        dsp.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, eqGainLF);
+        dsp.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, eqGainMF);
+        dsp.setParameterFloat((int)DSP_THREE_EQ.HIGHGAIN, eqGainHF);
+        channel.addDSP(0, dsp);
+        eq = dsp;
     }
 
     public void SetListenerPosition(vaudio.Vector3F position, float forwardX, float forwardZ)
@@ -48,13 +55,21 @@ public class FMODExample
         system.set3DListenerAttributes(0, ref listenerPos, ref listenerVel, ref forward, ref up);
     }
 
+    DSP? eq;
+    float eqGainLF = 0, eqGainMF = 0, eqGainHF = 0;
+
     public void SetFrequencyGain(float gainLF, float gainMF, float gainHF)
     {
-        system.createDSPByType(DSP_TYPE.THREE_EQ, out DSP eq);
-        eq.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, gainLF);
-        eq.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, gainLF);
-        eq.setParameterFloat((int)DSP_THREE_EQ.HIGHGAIN, gainHF);
-        channel.addDSP(0, eq);
+        eqGainLF = gainLF;
+        eqGainMF = gainMF;
+        eqGainHF = gainHF;
+
+        if (eq == null)
+            return;
+
+        eq.Value.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, gainLF);
+        eq.Value.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, gainMF);
+        eq.Value.setParameterFloat((int)DSP_THREE_EQ.HIGHGAIN, gainHF);
     }
 
     // Call this every frame to update FMOD's internal state
