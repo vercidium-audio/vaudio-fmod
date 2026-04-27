@@ -5,7 +5,8 @@ namespace vaudio_fmod;
 
 internal class Scene
 {
-    FMODExample fmod;
+    FMODSystem fmod;
+    FMODSound fmodSound;
     vaudio.RaytracingContext context;
     vaudio.Emitter listener;
     vaudio.Emitter speech;
@@ -71,31 +72,37 @@ internal class Scene
 
     void InitialiseFMOD()
     {
-        fmod = new FMODExample();
-        fmod.LoadSound("resource/audio/speech.wav");
-        fmod.SetListenerPosition(listener.Position.GetPosition(), 1, 0);
+        fmod = new FMODSystem();
+        fmod.LoadSoundData("resource/audio/speech.wav");
+        fmod.SetListenerPosition(listener.Position.GetPosition(), 0, 0);
     }
 
     // This callback is invoked when the listener raytraces the speech Emitter
     void OnSpeechRaytraced(vaudio.Emitter other)
     {
+        // Create a sound and low-pass filter
+        fmodSound = fmod.CreateSound(speech.Position.GetPosition());
+
+        // Update the filter
         UpdateLowPassFilter();
 
-        // Play the sound in fmod
-        fmod.PlayAt(speech.Position.GetPosition());
+        // Play the sound
+        fmodSound.Play();
     }
 
     Stopwatch prismWatch = Stopwatch.StartNew();
 
     internal void Update()
     {
+        fmod.SetListenerPosition(listener.Position.GetPosition(), 0, MathF.PI / 2);
+
         // Move the prism onto the speech Emitter to muffle it
-        var lerp = (MathF.Sin(prismWatch.ElapsedMilliseconds / 2000.0f) + 1) / 2;
+        var lerp = (MathF.Sin(prismWatch.ElapsedMilliseconds / 2000.0f + 1.25f) + 1) / 2;
 
         prism.transform = vaudio.Matrix4F.CreateTranslation(Lerp(10.0f, 15.0f, lerp), 10, 10);
 
-        listener.permeationColor = new vaudio.Color(255, 255, 0, 255);
-        listener.trailColor = new vaudio.Color(255, 0, 0, 255);
+        listener.permeationColor = new vaudio.Color(255, 150, 0, 255);
+        listener.trailColor = new vaudio.Color(255, 255, 255, 50);
 
         context.Update();
 
@@ -110,6 +117,9 @@ internal class Scene
 
     void UpdateLowPassFilter()
     {
+        if (fmodSound == null)
+            return;
+
         var filter = listener.GetTargetFilter(speech);
 
         // Convert from percentage range (0 to 1) to decibel range (-80 to 10)
@@ -117,7 +127,7 @@ internal class Scene
         var mfDecibels = PercentToDecibels((filter.gainLF + filter.gainHF) / 2);
         var hfDecibels = PercentToDecibels(filter.gainHF);
 
-        fmod.SetFrequencyGain(lfDecibels, mfDecibels, hfDecibels);
+        fmodSound.SetFrequencyGain(lfDecibels, mfDecibels, hfDecibels);
     }
 
     static float Lerp(float current, float target, float lerp) => current + (target - current) * lerp;
