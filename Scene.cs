@@ -166,7 +166,7 @@ internal class Scene
     void InitialiseFMOD()
     {
         fmod = new FMODSystem();
-        fmod.LoadSoundData("resource/audio/speech.wav");
+        fmod.LoadSoundData("resource/audio/speech.ogg");
 
         // Face the listener towards the speech Emitter
         fmod.SetListenerPosition(listener.Position.GetPosition(), 0, MathF.PI / 2);

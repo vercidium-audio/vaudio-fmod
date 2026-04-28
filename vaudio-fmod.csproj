@@ -5,21 +5,13 @@
 		<RootNamespace>vaudio_fmod</RootNamespace>
 	</PropertyGroup>
 
+	<!-- Step 1 - copy the fmod DLL to the lib folder -->
 	<ItemGroup>
 		<None Include="lib\fmod.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>fmod.dll</Link>
 		</None>
 	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<!-- Copy the resource folder to the build directory -->
-		<ItemGroup>
-			<ResourceFiles Include="$(ProjectDir)\resource\**\*.*" />
-		</ItemGroup>
-
-		<Copy SourceFiles="@(ResourceFiles)" DestinationFolder="$(OutDir)\resource\%(RecursiveDir)" />
-	</Target>
 
 	<PropertyGroup>
 		<!-- Replace this with the path to your vaudio SDK -->
@@ -42,7 +34,14 @@
 		<Copy SourceFiles="$(VAudioDir)\libSkiaSharp.dll" DestinationFolder="$(OutDir)" />
 		<Copy SourceFiles="$(VAudioDir)\libHarfBuzzSharp.dll" DestinationFolder="$(OutDir)" />
 
-		<!-- Copy the resource folder to the build directory -->
+		<!-- Copy the project resource folder to the build directory -->
+		<ItemGroup>
+			<ProjectResourceFiles Include="$(ProjectDir)\resource\**\*.*" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(ProjectResourceFiles)" DestinationFolder="$(OutDir)\resource\%(RecursiveDir)" />
+
+		<!-- Copy the vaudio resource folder to the build directory -->
 		<ItemGroup>
 			<ResourceFiles Include="$(VAudioDir)\resource\**\*.*" />
 		</ItemGroup>
