@@ -13,6 +13,7 @@ internal class Scene
     vaudio.Emitter speech;
     vaudio.PrismPrimitive clothPrism;
     List<vaudio.PrismPrimitive> concretePrisms = [];
+    Stopwatch watch = Stopwatch.StartNew();
 
     internal Scene()
     {
@@ -185,8 +186,6 @@ internal class Scene
         fmodSound.Play();
     }
 
-    Stopwatch watch = Stopwatch.StartNew();
-
     internal void Update()
     {
         // Move the prism onto the speech Emitter to muffle it
@@ -238,6 +237,6 @@ internal class Scene
         fmodSound.UpdateFilter(filter);
     }
 
+    // Helper method
     static float Lerp(float current, float target, float lerp) => current + (target - current) * lerp;
-
 }
