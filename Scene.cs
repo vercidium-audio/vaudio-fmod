@@ -37,10 +37,10 @@ internal class Scene
             Name = "Listener",
             PermeationRayCount = 32,
             PermeationBounceCount = 3,
-            ReverbRayCount = 32,
+            ReverbRayCount = 128,
             ReverbBounceCount = 24,
             MaxEchogramTime = 5000,
-            EchogramGranularity = 100,
+            EchogramGranularity = 50,
             Position = new vaudio.Vector3F(40, 50, 50),
 
             // Customise ray rendering
@@ -191,13 +191,19 @@ internal class Scene
     {
         // Move the prism onto the speech Emitter to muffle it
         {
-            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 2000.0f + 1.25f) + 1) / 2;
+            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 1500.0f + 1.25f) + 1) / 2;
             clothPrism.transform = vaudio.Matrix4F.CreateTranslation(Lerp(50.0f, 55.0f, lerp), 50, 50);
         }
 
-        // Expand/contract the concrete prisms over time
+        // Enclose/open the area
         {
-            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 4100.0f + 1.25f) + 1) / 2;
+            var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 900.0f + 1.25f) + 1) / 2;
+
+            if (lerp < 0.5f)
+                lerp = 0;
+            else
+                lerp = 1;
+
             var radius = Lerp(100, 25, lerp);
 
             var size = new vaudio.Vector3F(radius, radius, 1);
