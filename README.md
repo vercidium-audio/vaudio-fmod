@@ -1,6 +1,6 @@
 ## Vercidium Audio + FMOD Example
 
-This repository requires the Vercidium Audio SDK and FMOD SDK to run:
+This repository requires the Vercidium Audio SDK v1.1.1 and FMOD SDK v2.03 to run:
 - Download the Vercidium Audio SDK from [vercidium.com/audio](https://vercidium.com/audio)
 - Download the FMOD SDK from [fmod.com/download](https://fmod.com/download)
 
