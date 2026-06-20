@@ -194,7 +194,7 @@ internal class Scene
             clothPrism.transform = vaudio.Matrix4F.CreateTranslation(Lerp(50.0f, 55.0f, lerp), 50, 50);
         }
 
-        // Enclose/open the area
+        // Enclose/open the area (six prisms on the edges of the map)
         {
             var lerp = (MathF.Sin(watch.ElapsedMilliseconds / 900.0f + 1.25f) + 1) / 2;
 
