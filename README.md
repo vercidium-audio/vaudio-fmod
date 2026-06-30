@@ -15,12 +15,12 @@ Once FMOD is installed, copy the `C:/Program Files (x86)/FMOD SoundSystem/FMOD S
 Edit `vaudio-fmod.csproj` to point to the folder where the Vercidium Audio SDK lives:
 
 ```xml
-	<ItemGroup>
-		<Reference Include="vaudio">
-			<!-- Step 2 - replace this with the path to yourVercidium Audio .NET  SDK -->
-			<HintPath>path\to\your\dotnet\vaudio.dll</HintPath>
-		</Reference>
-	</ItemGroup>
+<ItemGroup>
+	<Reference Include="vaudio">
+		<!-- Step 2 - replace this with the path to yourVercidium Audio .NET  SDK -->
+		<HintPath>path\to\your\dotnet\vaudio.dll</HintPath>
+	</Reference>
+</ItemGroup>
 ```
 
 ## File Overview

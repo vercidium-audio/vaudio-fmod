@@ -40,7 +40,7 @@ internal class Scene
             PermeationBounceCount = 3,
             ReverbRayCount = 128,
             ReverbBounceCount = 24,
-            ReverbEnergyCap = 0.05f, // 5% of returning energy required for max reverb volume
+            ReverbEnergyCap = 0.05f, // 5% of returning energy is required for max reverb volume
             MaxEchogramTime = 5000,
             EchogramGranularity = 50,
             Position = new vaudio.Vector(40, 50, 50),
