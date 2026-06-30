@@ -11,6 +11,8 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>fmod.dll</Link>
 		</None>
+
+		<!-- Copy sound files -->
 		<None Include="resource\audio\speech.ogg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>resource\audio\speech.ogg</Link>
