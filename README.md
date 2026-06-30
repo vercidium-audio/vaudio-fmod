@@ -1,10 +1,10 @@
 ## Vercidium Audio + FMOD Example
 
-This repository requires the Vercidium Audio SDK v1.1.1 and FMOD SDK v2.03 to run:
-- Download the Vercidium Audio SDK from [vercidium.com/audio](https://vercidium.com/audio)
+This repository requires the Vercidium Audio SDK v1.2.0 and FMOD SDK v2.03 to run:
+- Download the Vercidium Audio SDK from [vercidium.com](https://vercidium.com)
 - Download the FMOD SDK from [fmod.com/download](https://fmod.com/download)
 
-> Please note that neither SDK is free for commercial use. See [fmod.com/licensing](https://fmod.com/licensing)
+> Please note that neither SDK is free for commercial use. See [fmod.com/licensing](https://fmod.com/licensing) and [vercidium.com/eula](https://vercidium.com/eula)
 
 ## FMOD Setup
 
@@ -12,17 +12,15 @@ Once FMOD is installed, copy the `C:/Program Files (x86)/FMOD SoundSystem/FMOD S
 
 ## Vercidium Audio Setup
 
-You can either copy the entire vaudio folder to the `vaudio-fmod/lib` folder:
-
-![screenshot of the vaudio-fmod/lib folder. It contains fmod.dll, and a folder called vaudio](docs/lib_folder.png)
-
-Or edit `vaudio-fmod.csproj` to point to the folder where the Vercidium Audio SDK lives:
+Edit `vaudio-fmod.csproj` to point to the folder where the Vercidium Audio SDK lives:
 
 ```xml
-<PropertyGroup>
-    <!-- Replace this with the path to your vaudio SDK -->
-    <VAudioDir>lib\vaudio</VAudioDir>
-</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="vaudio">
+			<!-- Step 2 - replace this with the path to yourVercidium Audio .NET  SDK -->
+			<HintPath>path\to\your\dotnet\vaudio.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 ```
 
 ## File Overview
@@ -32,7 +30,7 @@ Or edit `vaudio-fmod.csproj` to point to the folder where the Vercidium Audio SD
 - `resource/audio/speech.ogg` is an example file included for playback
 - `Scene.cs` creates a Vercidium Audio context and initialises FMOD
 
-Scene.cs is where you can adjust ray counts, add primitives, change materials and more. See the [Vercidium Audio docs](https://docs.vercidium.com/raytraced-audio/v110/Getting+Started) for more.
+Scene.cs is where you can adjust ray counts, add primitives, change materials and more. See the [Vercidium Audio docs](https://vercidium.com/docs) for more details.
 
 ## Controls
 

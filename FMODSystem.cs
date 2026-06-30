@@ -20,7 +20,7 @@ public class FMODSystem
         masterGroup.addDSP(0, reverbDSP);
     }
 
-    public void UpdateReverb(vaudio.EAXReverbResults eax)
+    public void UpdateReverb(vaudio.EAXReverb eax)
     {
         reverbDSP.setParameterFloat((int)DSP_SFXREVERB.DECAYTIME, eax.DecayTime * 1000); // ms
         reverbDSP.setParameterFloat((int)DSP_SFXREVERB.EARLYDELAY, eax.ReflectionsDelay * 1000); // ms
@@ -45,11 +45,14 @@ public class FMODSystem
     public void LoadSoundData(string filePath)
     {
         // FMOD_3D flag makes the sound positional
-        system.createSound(filePath, MODE._3D | MODE.LOOP_NORMAL, out sound);
+        var result = system.createSound(filePath, MODE._3D | MODE.LOOP_NORMAL, out sound);
+        if (result != RESULT.OK)
+            Console.WriteLine($"[FMOD] Failed to load '{filePath}': {result}");
+
         sound.set3DMinMaxDistance(1.0f, 1000.0f);
     }
 
-    public FMODSound CreateSound(vaudio.Vector3F position)
+    public FMODSound CreateSound(vaudio.Vector position)
     {
         // Start paused so we can set its position and filter before playback
         system.getMasterChannelGroup(out ChannelGroup masterGroup);
@@ -67,7 +70,7 @@ public class FMODSystem
         return new FMODSound(channel, dsp);
     }
 
-    public void SetListenerPosition(vaudio.Vector3F position, float pitch, float yaw)
+    public void SetListenerPosition(vaudio.Vector position, float pitch, float yaw)
     {
         float cosPitch = MathF.Cos(pitch);
         float sinPitch = MathF.Sin(pitch);

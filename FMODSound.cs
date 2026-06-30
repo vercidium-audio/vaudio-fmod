@@ -19,19 +19,19 @@ public class FMODSound
         channel.setPaused(false);
     }
 
-    public void UpdatePosition(vaudio.Vector3F pos)
+    public void UpdatePosition(vaudio.Vector pos)
     {
         VECTOR position = new() { x = pos.X, y = pos.Y, z = pos.Z };
         VECTOR velocity = new() { x = 0, y = 0, z = 0 };
         channel.set3DAttributes(ref position, ref velocity);
     }
 
-    public void UpdateFilter(vaudio.AudioFilter filter)
+    public void UpdateFilter(vaudio.LowPassFilter filter)
     {
         // Convert from percentage range (0 to 1) to decibel range (-80 to 10)
-        var lfDecibels = PercentToDecibels(filter.gainLF);
-        var mfDecibels = PercentToDecibels((filter.gainLF + filter.gainHF) / 2);
-        var hfDecibels = PercentToDecibels(filter.gainHF);
+        var lfDecibels = PercentToDecibels(filter.GainLF);
+        var mfDecibels = PercentToDecibels((filter.GainLF + filter.GainHF) / 2);
+        var hfDecibels = PercentToDecibels(filter.GainHF);
 
         eq.setParameterFloat((int)DSP_THREE_EQ.LOWGAIN, lfDecibels);
         eq.setParameterFloat((int)DSP_THREE_EQ.MIDGAIN, mfDecibels);
