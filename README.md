@@ -1,6 +1,6 @@
 ## Vercidium Audio + FMOD Example
 
-This repository requires the Vercidium Audio SDK v1.2.0 and FMOD SDK v2.03 to run:
+This repository requires the Vercidium Audio SDK v1.2.1 and FMOD SDK v2.03 to run:
 - Download the Vercidium Audio SDK from [vercidium.com](https://vercidium.com)
 - Download the FMOD SDK from [fmod.com/download](https://fmod.com/download)
 
@@ -17,8 +17,8 @@ Edit `vaudio-fmod.csproj` to point to the folder where the Vercidium Audio SDK l
 ```xml
 <ItemGroup>
 	<Reference Include="vaudio">
-		<!-- Step 2 - replace this with the path to yourVercidium Audio .NET  SDK -->
-		<HintPath>path\to\your\dotnet\vaudio.dll</HintPath>
+		<!-- Step 2 - replace this with the path to your Vercidium Audio .NET SDK -->
+		<HintPath>path\to\vercidium_audio_v1.2.1\dotnet\dev\vaudio.dll</HintPath>
 	</Reference>
 </ItemGroup>
 ```
